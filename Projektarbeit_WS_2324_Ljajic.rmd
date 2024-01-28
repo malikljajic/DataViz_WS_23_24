@@ -1,0 +1,65 @@
+---
+title: "Abschlussprojekt_Dataviz_WS2324_Malik_Ljajic"
+author: "Malik Ljajic (274699)"
+date: "2024-01-24"
+output:
+  html_document: default
+  pdf_document: default
+---
+# Einführung in die Gaskrise
+
+Eine Gaskrise ist ein ernstes Problem, das auftreten kann, wenn die Verfügbarkeit von Erdgas plötzlich knapp wird. Dies kann verschiedene Ursachen haben, z. B. Versorgungsengpässe, erhöhte Nachfrage oder politische Unruhen in den Lieferländern.
+
+Ziel unseres Projekts ist es, zu untersuchen, ob im Jahr 2024 eine Gaskrise droht. Dazu werte ich Daten aus verschiedenen Quellen aus, unter anderem aus der Gas Infrastructure Europe (GIE)-Datenbank (https://agsi.gie.eu/) und anderen relevanten Quellen. Mit Hilfe von Grafiken und Analysen möchte ich herausfinden, ob es Anzeichen für eine potenzielle Krise gibt.
+
+Mein Ziel ist es, die Entwicklung von Gaskrisen besser zu verstehen und Frühwarnsignale zu erkennen. Außerdem möchte ich lernen, wie man Daten effektiv analysiert und präsentiert, um die Situation einzuschätzen und bei Bedarf angemessen zu reagieren.
+
+Ich lade Sie gerne hiermit ein, gemeinsam mit mir zu untersuchen, welche Erkenntnisse die Daten über eine mögliche Gaskrise im Jahr 2024 liefern können.
+
+
+Im Rahmen meines Universitätsprojekts analysiere ich zunächst Daten aus der Gas Infrastructure Europe (GIE) Datenbank (https://agsi.gie.eu/). Ziel ist es, diese Informationen durch eine verbesserte grafische Darstellung zugänglicher zu machen und so ein tieferes Verständnis zu ermöglichen. Im weiteren Verlauf werde ich mich einer vertieften Auseinandersetzung mit der im Kurs erstellten und durchgeführten Umfrage widmen, um schließlich die gewonnenen Ergebnisse im Detail zu präsentieren.
+
+
+## Datenimport
+Die Daten aus der Association of Issuing Bodies (AGSI) wurden auf GitHub hochgeladen, um sie nicht nur lokal zugänglich zu machen, sondern auch für jeden ausführbar. Dies ermöglicht eine einfache und kollaborative Nutzung der Daten im Rahmen des Data Viz Projekts für das Wintersemester 2023/2024.
+
+```{r}
+library(readr)
+
+Pfad <- "https://raw.githubusercontent.com/malikljajic/DataViz_WS_23_24/main/AGSI_CountryAggregatedDataset_gasDayStart_2024-01-26.csv"
+
+data_AGSI_complete <- read_delim(Pfad, delim = ";", escape_double = FALSE, trim_ws = TRUE)
+View(data_AGSI_complete) 
+
+```
+
+Dieser Code liest die Daten direkt von der angegebenen URL ein und ermöglicht es, sie im Projekt zu verwenden, ohne die Dateien vorher lokal heruterladen zu müssen und den Pfad anzupassen.
+
+
+## Erstellung eines Balkendiagramms
+
+```{r}
+library(ggplot2)
+
+# Filtern der Daten, um nur Länder ohne "N"-Status und vom Typ "country" zu behalten
+CountryWithData <- subset(data_AGSI_complete, Status != "N" & Type == "country")
+
+# Erstellen des Balkendiagramms
+GasStoragePerCountry <- ggplot(data = CountryWithData, aes(x = `Gas in storage (TWh)`, y = Name, fill = Status)) +
+  geom_col(width = 0.5) +
+  labs(title = "Gas Storage per Country January 2024", x = "Gas in Storage (TWh)", y = "Country", fill = "State") +
+  scale_x_continuous(breaks = seq(0, 260, by = 20), limits = c(0, 240), expand = c(0, 0))
+
+# Hinzufügen der Zahlen in die Balken und anpassung 
+GasStoragePerCountry + 
+  geom_text(aes(label = round(`Gas in storage (TWh)`, 3)), hjust = -0.3, size = 3, color = "black") +
+  scale_fill_manual(name = "Status", values = c("C" = "#5AA354", "E" = "#f6ac50"),
+                    labels = c("C" = "C = Confirmed", "E" = "E = Estimated")) +
+  guides(fill = guide_legend(title = "Status", position = "right")) +
+  theme(legend.text = element_text(size = 10, color = "black"))
+
+
+```
+
+Im vorliegenden Balkendiagramm wird nun deutlich, wie effizient Deutschland im Vergleich zu anderen Ländern seine Gasreserven verwaltet. Allerdings ist zu beachten, dass der Wert für Deutschland lediglich eine Schätzung darstellt und noch nicht der Quelle AGSI bestätigt wurde. Länder wie Italien, die Niederlande und Frankreich verfügen über signifikant geringere Gasvorräte. Hieraus ergibt sich die Fragestellung, ob diese Länder auch einen geringeren Gasverbrauch aufweisen.Schauen wir uns den Durchschnittsverbrauch in den einzelnen Ländern mal genauer an:
+
