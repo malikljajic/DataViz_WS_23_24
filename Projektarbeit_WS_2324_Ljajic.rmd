@@ -61,5 +61,218 @@ GasStoragePerCountry +
 
 ```
 
-Im vorliegenden Balkendiagramm wird nun deutlich, wie effizient Deutschland im Vergleich zu anderen Ländern seine Gasreserven verwaltet. Allerdings ist zu beachten, dass der Wert für Deutschland lediglich eine Schätzung darstellt und noch nicht der Quelle AGSI bestätigt wurde. Länder wie Italien, die Niederlande und Frankreich verfügen über signifikant geringere Gasvorräte. Hieraus ergibt sich die Fragestellung, ob diese Länder auch einen geringeren Gasverbrauch aufweisen.Schauen wir uns den Durchschnittsverbrauch in den einzelnen Ländern mal genauer an:
+Dieser Code erstellt ein Balkendiagramm, das den Gasvorrat pro Land im Januar 2024 darstellt.
+
+1. **Filtern der Daten**: Zuerst werden die Daten gefiltert, um nur Länder ohne den Status "N" und vom Typ "country" zu behalten.
+
+2. **Erstellung des Balkendiagramms**: Mit `ggplot` wird das Balkendiagramm erstellt. Die Daten stammen aus dem gefilterten Datensatz. Die x-Ästhetik wird auf den Gasvorrat (in Terrawattstunden) gesetzt, und die y-Ästhetik auf den Ländernamen. Die Balken werden nach dem Status gefärbt.
+
+3. **Anpassung von Titel und Achsenbeschriftungen**: Mit `labs` werden der Titel des Diagramms und die Achsenbeschriftungen festgelegt. Die Achse für den Gasvorrat wird mit geeigneten Werten und Limits angepasst.
+
+4. **Hinzufügen von Beschriftungen zu den Balken**: Mit `geom_text` werden die Zahlen für den Gasvorrat zu den Balken hinzugefügt. Der Parameter `hjust = -0.3` verschiebt die Beschriftungen außerhalb der Balken, und `size = 3` legt die Schriftgröße fest.
+
+5. **Anpassung der Farben und der Legende**: Mit `scale_fill_manual` werden die Farben für die Balken entsprechend dem Status festgelegt. Die Legende wird rechts unten im Diagramm platziert.
+
+6. **Anpassung der Legendenbeschriftungen**: Die Beschriftungen der Legende werden mit `guides` angepasst, um die Bedeutung der Statussymbole zu erklären.
+
+Das Balkendiagramm bietet eine visuelle Darstellung des Gasvorrats pro Land und ermöglicht einen schnellen Vergleich zwischen den Ländern hinsichtlich ihres Gasvolumens und Status.
+
+Im vorliegenden Balkendiagramm wird nun deutlich, wie effizient Deutschland im Vergleich zu anderen Ländern seine Gasreserven verwaltet. Allerdings ist zu beachten, dass der Wert für Deutschland lediglich eine Schätzung darstellt und noch nicht der Quelle AGSI bestätigt wurde. Länder wie Italien, die Niederlande und Frankreich verfügen über signifikant geringere Gasvorräte. Hieraus ergibt sich die Fragestellung, wie viel Lagermöglichkeiten hat das jeweilige Land? Folgenes Kreisdiagramm wird die Top 5 Länder mit den meisten Speicherkapazitäten darstellen: 
+
+# Erstellung eines Kreisdiagramms
+
+```{r}
+library(ggplot2)
+library(dplyr)
+
+# Filter Datensatz erstellen Top 5 Speichervolumen Länder
+top_countries <- CountryWithData %>%
+  arrange(desc(`Technical Capacity (TWh)`)) %>%
+  slice_head(n = 5)
+
+# Kreisdiagramm mit Beschriftung 
+pie_chart <- ggplot(top_countries, aes(x = "", y = `Technical Capacity (TWh)`, fill = Name)) +
+  geom_bar(stat = "identity", color = "white") +
+  coord_polar("y", start = 0) +
+  geom_text(aes(label = paste0(round(`Technical Capacity (TWh)`, 1), " TWh\n", 
+                               scales::percent(`Technical Capacity (TWh)` / sum(`Technical Capacity (TWh)`),
+                               accuracy = 1))), position = position_stack(vjust = 0.555)) +  
+  labs(title = "Top 5 Länder mit den größten technischen Speicherkapazitäten",
+       fill = "Länder") +
+  theme_void() +
+  theme(legend.position = "bottom") +
+  guides(fill = guide_legend(title = "Länder (TWh = terrawatt hours)"))
+
+# Anzeigen des Kreisdiagramms
+print(pie_chart)
+```
+
+
+1. **Filtern des Datensatzes**: Zuerst wird der Datensatz `CountryWithData` gefiltert, um nur die Top 5 Länder mit den größten technischen Speicherkapazitäten auszuwählen. Dies geschieht durch Sortieren der Daten nach absteigender technischer Kapazität und Auswahl der ersten 5 Zeilen.
+
+2. **Erstellung des Kreisdiagramms**: Mit `ggplot` wird ein leeres Kreisdiagramm erstellt. Die Daten für das Diagramm stammen aus dem gefilterten Datensatz. Die x-Ästhetik wird auf ein leeres Element gesetzt, da wir ein Kreisdiagramm erstellen möchten. Die y-Ästhetik wird auf die technische Kapazität (in Terrawattstunden) gesetzt, und die Füllfarbe der Balken wird nach dem Landnamen festgelegt.
+
+3. **Hinzufügen von Balken**: Mit `geom_bar` wird jedem Land ein Balken entsprechend seiner technischen Kapazität zugeordnet. Der Parameter `stat = "identity"` bedeutet, dass die Höhe der Balken direkt aus den Daten stammt.
+
+4. **Koordinatenanpassung**: Mit `coord_polar` werden die Koordinaten in ein polares Koordinatensystem umgewandelt, um ein Kreisdiagramm zu erstellen. Der Parameter `"y"` legt fest, dass die Balken um den Kreis herum angeordnet werden sollen.
+
+5. **Hinzufügen von Beschriftungen**: Mit `geom_text` werden die Beschriftungen zu den Balken hinzugefügt. Die Beschriftungen enthalten die technische Kapazität jedes Landes in Terrawattstunden sowie den prozentualen Anteil der technischen Kapazität am Gesamtwert.
+
+6. **Anpassung von Titel und Legende**: Mit `labs` und `theme_void` werden der Titel des Diagramms und der Hintergrund des Diagramms festgelegt. Die Legende wird unten im Diagramm platziert.
+
+7. **Anzeigen des Diagramms**: Mit `print` wird das Kreisdiagramm angezeigt.
+
+Das Kreisdiagramm bietet eine anschauliche Darstellung der technischen Speicherkapazitäten für Gas in den fünf führenden Ländern. Es ermöglicht einen schnellen Vergleich zwischen diesen Ländern. Deutlich erkennbar ist, dass die Ukraine mit einer Speicherkapazität von 320,7 Terawattstunden (TWh) an der Spitze steht, gefolgt von Deutschland mit 254,8 TWh.
+
+Im direkten Vergleich mit dem Balkendiagramm lässt sich feststellen, dass zum Zeitpunkt Januar 2024 keine Bedenken hinsichtlich einer möglichen Gaskrise geäußert werden können. Die Speicher sind gut gefüllt und bieten für den restlichen Winter noch ausreichend Energie. In Nachbarländern wie den Niederlanden ist die Situation anders. Belgien, das es nicht einmal unter die Top 5 geschafft hat, verfügt nur über einen Bruchteil der deutschen Gasreserven.
+
+# Umfrage 
+
+Um einen nahtlosen Übergang zum zweiten Teil unserer Umfrage zu gewährleisten, möchten wir zunächst einen Überblick über die gesammelten Daten geben. In diesem Abschnitt haben wir uns intensiv mit der Einschätzung der Teilnehmer zur aktuellen Gassituation und ihren Erwartungen für die Zukunft befasst. Die aus der Umfrage gewonnenen Daten werden uns dabei helfen, ein tieferes Verständnis für die Wahrnehmung der Gassituation zu entwickeln und potenzielle Trends zu identifizieren.
+
+Folgende Fragen stellten wir den Teilnehmern: 
+
+
+### 1. Erwartungshaltung Füllstand Gasspeicher
+
+- Seit letztem Jahr ist Gasknappheit ein präsentes Thema im öffentlichen Diskurs. Wie gut informiert fühlst du dich bezüglich dessen? 
+- Wie hoch schätzt du den Füllstand der deutschen Gaslager zum aktuellen Zeitpunkt ein?
+- Denkst du, eine Gasknappheit im Winter 2024/2025 ist wahrscheinlich?
+- Glaubst du, dass das Risiko einer Gasknappheit in Deutschland höher oder niedriger als in anderen EU-Ländern ist?
+
+### 2. Kenntnis Füllstand und Gaspreisentwicklung
+
+- Welche Faktoren beeinflussen deiner Meinung nach am stärksten die Gaspreise in Deutschland?
+- Die Gaspreise in Deutschland sind im Vergleich zum europäischen Durchschnitt …
+- Erwartest du im Winter 2024/2025 einen höheren oder niedrigeren Gaspreis als im aktuellen Winter 2023/2024?
+
+### 3. Kenntnis über politische Ereignisse bzgl. Füllstand
+
+- Über welche Medien informierst du dich hauptsächlich über politische Entscheidungen zur Gasversorgung?
+- Welchen Einfluss hat deiner Meinung nach geopolitische Beteiligung Deutschlands auf die Füllstände der deutschen Gasreserven?
+- Wer ist der aktuell wichtigste Gaslieferant Deutschlands?
+- Welches internationale Abkommen zielt darauf ab, die Treibhausgasemissionen zu reduzieren und beeinflusst somit indirekt die Gaspolitik?
+
+### 4. Kenntnis Füllstand und Wetter
+
+- In der Kalenderwoche bis zum 10.12.2023 war es im Schnitt 1,6 Grad kälter als im Zeitraum der Jahre 2018 bis 2021. Wie hat sich das auf den Gasverbrauch ausgewirkt?
+- Wie stark denkst du ist der Zusammenhang zwischen extremen Temperaturveränderungen und Gasverbrauch von Privathaushalten?
+- Wie stark denkst du ist der Zusammenhang zwischen extremen Temperaturveränderungen und Gasverbrauch der Industrie?
+
+### 5. Kenntnis Füllstand und Verbrauch
+
+- Denkst du, der durchschnittliche Bürger hat im Winter 2022/2023, als Gasknappheit ein präsentes Thema in den Medien war, bewusster auf seinen Gasverbrauch geachtet als in Vorjahren?
+  
+- Wie stark denkst du, hat der bisherige Ausbau von erneuerbarer Energie (Solar, Wärmeleitpumpen, Windkraft, Wasserkraft) den Gasverbrauch verringert?
+  
+- Welche Faktoren beeinflussen deiner Meinung nach am stärksten die Gasfüllstände in Deutschland?
+ 
+- Welche Faktoren beeinflussen deiner Meinung nach den individuellen Gasverbrauch am stärksten?
+  
+
+### 6. Psychographische Daten
+
+- Wie wichtig ist es für dich persönlich, bewusst auf deinen Energieverbauch im Alltag zu achten?
+- Welche Energiesparmaßnahmen setzt du in deinem Alltag bewusst um?
+- Hast du dich in der Vergangenheit aktiv an öffentlichen Energiesparinitiativen beteiligt? (z.B. Öffentlicher Diskurs, Teilnahme an Demonstrationen)
+- Wie hoch denkst du ist der Einfluss von Energiesparen auf den Klimawandel?
+- Welche Informationen würden dir helfen dich bewusster mit deinem Energieverbrauch          auseinanderzusetzen?
+  Vergleich des persönlichen mit dem durchschnittlichen Verbrauch, (offenes Antwortfeld)
+- Welchen der folgenden öffentlichen Energiesparinitiativen stimmst du zu?
+- Welche der folgenden Energiequellen denkst du sind in Zukunft am relevantesten?
+- Wie wichtig ist es für dich, dass zukünftige Energieproduktionstechnologien umweltfreundlich sind
+
+# Erstellung der Auswertung der Umfrageergebnisse
+
+Die Analyse sämtlicher Fragen würde einen beträchtlichen Umfang an Arbeit erfordern. Aus diesem Grund habe ich mich darauf konzentriert, zwei Diagramme zu erstellen, um die Daten genauer zu untersuchen.
+
+```{r}
+library(readr)
+
+Pfad <- "https://raw.githubusercontent.com/malikljajic/DataViz_WS_23_24/main/Umfrage%20Gas-Aussichten.csv"
+
+data_survey <- read_delim(Pfad, delim = ";", escape_double = FALSE, trim_ws = TRUE, locale = locale(encoding = "850"))
+View(data_survey)
+
+```
+
+Auch hier habe ich mich für die Datenverwaltung / Speicherung auf einem Github Repsitory entschieden, da das Markdown somit von jedem Rechner ausführbar bleibt. 
+
+Der Code verwendet die `readr`-Bibliothek, um eine CSV-Datei von einem bestimmten Pfad zu lesen und in einen Datensatz zu laden. Die Zeichenkodierung "850" (auch bekannt als "Latin-1" oder "ISO 8859-1") wird verwendet, um sicherzustellen, dass Sonderzeichen und Umlaute korrekt interpretiert werden.
+
+```{r}
+library(ggplot2)
+
+# Anzahl der Teilnehmer zählen
+anzahl_teilnehmer <- nrow(data_survey)
+
+# Balkendiagramm erstellen
+ggplot(data_survey, aes(x = `SEIT LETZTEM JAHR IST GASKNAPPHEIT EIN PRÄSENTES THEMA IM ÖFFENTLICHEN DISKURS. WIE GUT FÜHLST DU DICH DARÜBER INFORMIERT? X SEHR SCHLECHT X SEHR GUT`)) +
+  geom_bar(fill = "skyblue", color = "black") +
+  labs(title = "Anzahl der Teilnehmer",
+       x = "Informationsniveau",
+       y = "Anzahl der Teilnehmer") +
+  theme_minimal()
+
+```
+
+1. **Filtern des Datensatzes**: Zuerst wird der Datensatz `data_survey` verwendet, um die Anzahl der Teilnehmer zu zählen. Dies gibt uns eine Übersicht darüber, wie viele Personen an der Umfrage teilgenommen haben.
+
+2. **Erstellung des Balkendiagramms**: Mit `ggplot` wird ein leeres Balkendiagramm erstellt. Die Daten für das Diagramm stammen aus der Spalte "SEIT LETZTEM JAHR IST GASKNAPPHEIT EIN PRÄSENTES THEMA IM ÖFFENTLICHEN DISKURS. WIE GUT FÜHLST DU DICH DARÜBER INFORMIERT? X SEHR SCHLECHT X SEHR GUT" des Datensatzes `data_survey`. Die x-Ästhetik wird auf die verschiedenen Informationsniveaus gesetzt, während die y-Ästhetik auf die Anzahl der Teilnehmer mit diesem Informationsniveau festgelegt ist.
+
+3. **Hinzufügen von Balken**: Mit `geom_bar` werden Balken entsprechend der Anzahl der Teilnehmer für jedes Informationsniveau hinzugefügt. Der Parameter `fill = "skyblue"` legt die Füllfarbe der Balken fest, während `color = "black"` die Balkenlinienfarbe definiert.
+
+4. **Anpassung der Achsenbeschriftungen**: Die Achsenbeschriftungen werden mit `labs` festgelegt. Der Titel des Diagramms wird auf "Anzahl der Teilnehmer" gesetzt, während die Achsenbeschriftungen für x und y spezifiziert werden.
+
+5. **Anpassung des Erscheinungsbilds**: Mit `theme_minimal()` wird das Erscheinungsbild des Diagramms angepasst, um eine klare und einfache Darstellung zu gewährleisten.
+
+
+```{r}
+# Definition der Antwortoptionen für das Informationsniveau
+antwortoptionen <- c("Sehr schlecht", "Schlecht", "Mittel", "Gut", "Sehr gut")
+
+# Festlegung der numerischen Skala für die Antwortoptionen
+skala <- c(-2, -1, 0, 1, 2)
+
+# Zählen der Teilnehmer pro Antwortoption
+informationsniveau_count <- table(data_survey$`SEIT LETZTEM JAHR IST GASKNAPPHEIT EIN PRÄSENTES THEMA IM ÖFFENTLICHEN DISKURS. WIE GUT FÜHLST DU DICH DARÜBER INFORMIERT? X SEHR SCHLECHT X SEHR GUT`)
+
+# Berechnung des Prozentsatzes der Teilnehmer pro Antwortoption
+prozent_teilnehmer <- round(prop.table(informationsniveau_count) * 100, 1)
+
+# Definition der Farbpalette für das Diagramm
+farben <- c("#FF9999", "#66B2FF", "#99FF99", "#FFCC99", "#C2C2F0")
+
+# Erstellung des Kreisdiagramms
+pie(informationsniveau_count, main = "Informationsniveau bezüglich Gasknappheit",
+    col = farben, labels = NULL)
+
+# Hinzufügen der Legende
+legend("topright", inset = c(0, 0), cex = 0.8,
+       title = "Informationsniveau", fill = farben,
+       legend = paste(antwortoptionen, "(", skala, ")", ": ", prozent_teilnehmer, "%"))
+
+# Hinzufügen des Diagrammtitels
+title(main = "Informationsniveau bezüglich Gasknappheit", cex.main = 1.2)
+
+# Hinzufügen der Beschriftung zur Anzahl der Teilnehmer
+text(1, -1, paste("Teilnehmer:", sum(informationsniveau_count)), cex = 1.5)
+
+```
+
+1. **Definition der Antwortoptionen und Skala**: Zuerst werden die Antwortoptionen für das Informationsniveau ("Sehr schlecht" bis "Sehr gut") in einem Vektor definiert. Eine numerische Skala wird ebenfalls festgelegt, die den Antwortoptionen zugeordnet ist (-2 bis 2).
+
+2. **Zählen der Teilnehmer pro Antwortoption**: Die Funktion `table()` wird verwendet, um die Anzahl der Teilnehmer zu zählen, die jede Antwortoption gewählt haben. Dies geschieht basierend auf den Daten in der entsprechenden Spalte des Datensatzes.
+
+3. **Berechnung des Prozentsatzes der Teilnehmer pro Antwortoption**: Durch Anwenden der Funktion `prop.table()` auf die Anzahl der Teilnehmer pro Antwortoption wird der prozentuale Anteil jedes Informationsniveaus berechnet. Das Ergebnis wird auf eine Dezimalstelle gerundet.
+
+4. **Definition der Farbpalette**: Eine Reihe von Farben wird definiert, um jedem Informationsniveau im Kreisdiagramm eine eindeutige Farbe zuzuweisen.
+
+5. **Erstellung des Kreisdiagramms**: Ein leeres Kreisdiagramm wird mit der Funktion `pie()` erstellt. Die Anzahl der Teilnehmer pro Informationsniveau wird als Daten für das Diagramm verwendet.
+
+6. **Hinzufügen der Legende**: Eine Legende wird in der oberen rechten Ecke des Diagramms mit `legend()` hinzugefügt. Die Legende enthält die Antwortoptionen, ihre Skalenzuordnung und den prozentualen Anteil der Teilnehmer für jedes Informationsniveau.
+
+7. **Hinzufügen des Diagrammtitels**: Ein Titel wird über dem Diagramm mit `title()` hinzugefügt, um den Inhalt des Diagramms zu beschreiben.
+
+8. **Hinzufügen der Beschriftung zur Anzahl der Teilnehmer**: Eine Textbeschriftung wird unten rechts im Diagramm platziert, um die Gesamtanzahl der Teilnehmer an der Umfrage anzuzeigen. Die Funktion `text()` wird verwendet, um diese Beschriftung hinzuzufügen.
 
